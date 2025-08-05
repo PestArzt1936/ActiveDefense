@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+	<ThingDef ParentName="MinifiedThing">
+		<defName>EMPEmitter_Minified</defName>
+		<label>EMP Emitter (boxed)</label>
+		<entityDefToBuild>EMPEmitter</entityDefToBuild>
+		<graphicData>
+			<texPath>Things/Item/EMPEmitter</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+		</graphicData>
+		<!-- категория тоже нужна для хранения на складе -->
+		<thingCategories>
+			<li>BuildingsMisc</li>
+		</thingCategories>
+	</ThingDef>
+
+	
+	
+	
+	
+	
+	
+	<ThingDef ParentName="BuildingBase" Name="SecurityAbs" Abstract="True">
+		<leaveResourcesWhenKilled>true</leaveResourcesWhenKilled>
+		<category>Building</category>
+		<selectable>true</selectable>
+		<researchPrerequisites>
+			<li>ShutDownProtocol</li>
+		</researchPrerequisites>
+		<designationCategory>Security</designationCategory>
+		<rotatable>false</rotatable>
+	</ThingDef>
+	<!-- ////////////////////////////////////////////////////////////////////-->
+  <ThingDef ParentName="SecurityAbs" Name="EMPEmitter">
+    <defName>EMPEmitter</defName>
+    <label>EMP emitter</label>
+    <description>Builds up electric charge and emits a powerful EMP blast 30 tiles around.</description>
+	  <thingCategories>
+		  <li>BuildingsMisc</li>
+	  </thingCategories>
+	  <minifiedDef>EMPEmitter_Minified</minifiedDef>
+	  <blockWind>false</blockWind>
+    <size>(2,2)</size>
+    <costList>
+        <Steel>320</Steel>
+        <ComponentIndustrial>6</ComponentIndustrial>
+		    <ComponentSpacer>1</ComponentSpacer>
+    </costList>
+    <graphicData>
+      <texPath>Things/Building/Building_EMPEmitter</texPath>
+      <graphicClass>Graphic_Multi</graphicClass>
+      <drawSize>(2.0, 2.0)</drawSize>
+    </graphicData>
+    <thingClass>ActiveDefense.Building_EMPEmitter</thingClass>
+    <comps>
+		<li Class="ActiveDefense.CompProperties_EMPActivator">
+			<radius>50</radius>
+			<SafeRadius>5</SafeRadius>
+			<!--Amount of energy needed in network to deal default damage(50)-->
+			<DefaultDamageEnergy>4200</DefaultDamageEnergy>
+		</li>
+		<li Class="CompProperties_Power">
+			<compClass>CompPowerTrader</compClass>
+			<basePowerConsumption>0</basePowerConsumption>
+		</li>
+		<li Class="ActiveDefense.CompProperties_EMPOnDestroy"/>
+		<li Class="CompProperties_Breakdownable"/>
+	</comps>
+    <statBases>
+      <MarketValue>1800</MarketValue>
+      <MaxHitPoints>380</MaxHitPoints>
+      <Flammability>4</Flammability>
+	    <Beauty>5</Beauty>
+      <Mass>300</Mass>
+      <WorkToBuild>20000</WorkToBuild>
+	    <Cleanliness>-25</Cleanliness>
+    </statBases>
+    <fillPercent>1.0</fillPercent>
+    <passability>Impassable</passability>
+    <placeWorkers>
+      <li>ActiveDefense.PlaceWorker_EMPZone</li>
+    </placeWorkers>
+    <constructionSkillPrerequisite>9</constructionSkillPrerequisite>
+  </ThingDef>
+</Defs>

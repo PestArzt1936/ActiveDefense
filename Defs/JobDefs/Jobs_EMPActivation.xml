@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <JobDef>
+    <defName>ActivateEMP</defName>
+    <driverClass>ActiveDefense.JobDriver_ActivateEMP</driverClass>
+    <reportString>activating EMP</reportString>
+    <playerInterruptible>true</playerInterruptible>
+    <casualInterruptible>true</casualInterruptible>
+    <checkOverrideOnDamage>Always</checkOverrideOnDamage>
+    <joyGainRate>0</joyGainRate>
+  </JobDef>
+  <JobDef>
+    <defName>DoEMP</defName>
+    <driverClass>ActiveDefense.JobDriver_ActivateEMP</driverClass>
+    <reportString>activating EMP</reportString>
+    <playerInterruptible>true</playerInterruptible>
+    <casualInterruptible>true</casualInterruptible>
+    <checkOverrideOnDamage>Always</checkOverrideOnDamage>
+    <joyGainRate>0</joyGainRate>
+  </JobDef>
+</Defs>

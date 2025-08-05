@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+	<ThingDef ParentName="BaseBulletCE">
+		<defName>Bullet_TempestArc</defName>
+		<label>tempest arc</label>
+		<graphicData>
+			<texPath>Things/Projectiles/TempestArc</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+			<drawSize>(1.2, 1.2)</drawSize>
+		</graphicData>
+		<projectile Class="CombatExtended.ProjectilePropertiesCE">
+			<damageDef>EMP</damageDef>
+			<damageAmountBase>30</damageAmountBase>
+			<armorPenetrationBase>999</armorPenetrationBase>
+			<speed>250</speed>
+			<stoppingPower>0.1</stoppingPower>
+			<flyOverhead>false</flyOverhead>
+		</projectile>
+	</ThingDef>
+</Defs>
