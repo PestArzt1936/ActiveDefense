@@ -21,7 +21,7 @@ namespace ActiveDefense
     {
         public CompProperties_TempestArcEffect()
         {
-            this.compClass = typeof(CompTempestArcEffect);
+            this.compClass = typeof(Projectile_TempestArc);
         }
     }
     public class CompProperties_EnergyConsumption : CompProperties

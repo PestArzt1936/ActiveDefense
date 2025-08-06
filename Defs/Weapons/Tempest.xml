@@ -58,7 +58,7 @@
 				<defaultProjectile>Bullet_TempestArc</defaultProjectile>
 				<warmupTime>3</warmupTime>
 				<minRange>2</minRange>
-				<range>50</range>
+				<range>30</range>
 				<soundCast>Electric_Spark_Large</soundCast>
 			</li>
 		</verbs>
