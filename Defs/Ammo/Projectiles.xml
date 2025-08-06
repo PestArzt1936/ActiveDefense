@@ -8,6 +8,7 @@
 			<graphicClass>Graphic_Single</graphicClass>
 			<drawSize>(1.2, 1.2)</drawSize>
 		</graphicData>
+		<thingClass>ActiveDefense.Projectile_TempestArc</thingClass>
 		<projectile Class="CombatExtended.ProjectilePropertiesCE">
 			<damageDef>EMP</damageDef>
 			<damageAmountBase>30</damageAmountBase>

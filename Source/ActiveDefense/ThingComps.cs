@@ -165,8 +165,6 @@ namespace ActiveDefense
 
             FleckMaker.Static(pos, map, FleckDefOf.ExplosionFlash, Props.radius);
             SoundDefOf.MechChargerStart.PlayOneShot(new TargetInfo(pos,map));
-            Log.Message($"Selected:{1-selectedPct}");
-            //Do not change
             ResetSummaryEnergy(parent,selectedPct);
         }
     }
@@ -203,10 +201,11 @@ namespace ActiveDefense
         public override void CompTickRare()
         {
             base.CompTickRare();
-
+            Log.Message("Is tick rate working?");
             // Только если в руках у пешки
             if (this.parent.ParentHolder is Pawn_EquipmentTracker tracker)
             {
+                Log.Message("You are holding weapon");
                 Pawn owner = tracker.pawn;
 
                 // И если он рядом с энергосетью
