@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+    <SoundDef>
+  <defName>TempestBolt_Tail</defName>
+  <context>MapOnly</context>
+  <maxVoices>4</maxVoices>
+		<maxSimultaneous>1</maxSimultaneous>
+  <subSounds>
+    <li>
+      <grains>
+        <li Class="AudioGrain_Clip">
+          <clipPath>Tempest/TempestBolt_Tail</clipPath>
+        </li>
+      </grains>
+      <volumeRange>15</volumeRange>
+      <pitchRange>0.95~1.05</pitchRange>
+    </li>
+  </subSounds>
+</SoundDef>
+<SoundDef>
+  <defName>TempestBolt_Cast</defName>
+  <context>MapOnly</context>
+  <maxVoices>2</maxVoices>
+		<maxSimultaneous>1</maxSimultaneous>
+  <subSounds>
+    <li>
+      <grains>
+        <li Class="AudioGrain_Clip">
+          <clipPath>Tempest/TempestBolt_Cast</clipPath>
+        </li>
+      </grains>
+      <volumeRange>15</volumeRange>
+      <pitchRange>0.95~1.05</pitchRange>
+    </li>
+  </subSounds>
+</SoundDef>
+</Defs>

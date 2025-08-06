@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+    <RecipeDef>
+        <defName>Make_Tempest</defName>
+		<label>assemble tempest</label>
+		<description>Use electricity and components to create stopping power.</description>
+		<jobString>Assembling Tempest.</jobString>
+		<effectWorking>Smelt</effectWorking>
+		<soundWorking>Recipe_Smelt</soundWorking>
+        <workSpeedStat>GeneralLaborSpeed</workSpeedStat>
+		<workAmount>31550</workAmount>
+        <skillRequirements>
+            <Crafting>10</Crafting>
+        </skillRequirements>
+        <workSkill>Crafting</workSkill>
+        <requiredGiverWorkType>Crafting</requiredGiverWorkType>
+				<ingredients>
+			<li>
+				<filter>
+					<thingDefs>
+						<li>Steel</li>
+					</thingDefs>
+				</filter>
+				<count>80</count>
+			</li>
+			<li>
+				<filter>
+					<thingDefs>
+						<li>Chemfuel</li>
+					</thingDefs>
+				</filter>
+				<count>25</count>
+			</li>
+			<li>
+				<filter>
+					<thingDefs>
+						<li>ComponentIndustrial</li>
+					</thingDefs>
+				</filter>
+				<count>8</count>
+			</li>
+		</ingredients>
+		<fixedIngredientFilter>
+			<thingDefs>
+				<li>Steel</li>
+				<li>Chemfuel</li>
+				<li>ComponentIndustrial</li>
+			</thingDefs>
+		</fixedIngredientFilter>
+		<products>
+			<AD_Tempest>1</AD_Tempest>
+		</products>
+		<recipeUsers>
+			<li>FabricationBench</li>
+            <li>TableMachining</li>
+		</recipeUsers>
+    </RecipeDef>
+</Defs>

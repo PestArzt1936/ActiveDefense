@@ -175,11 +175,16 @@ namespace ActiveDefense
         public float CurrentCharge;
         public bool HasCharge => CurrentCharge >= Props.BaseEnergyConsumptionPerShot;
         private int AmountOfTicksForRare = 30;
+        private int TicksCount = 0;
+        private MoteDualAttached TempestWireMote;
         public override void Initialize(CompProperties props)
         {
             base.Initialize(props);
-            
             CurrentCharge = Props.BaseEnergyMag;
+        }
+        public override void PostSpawnSetup(bool respawningAfterLoad)
+        {
+            base.PostSpawnSetup(respawningAfterLoad);
         }
         public override IEnumerable<Gizmo> CompGetGizmosExtra()
         {
@@ -215,7 +220,6 @@ namespace ActiveDefense
             float max = Source.Props.storedEnergyMax;
 
             float newSet = Math.Max(0f, stEn - GainPerInterval);
-            Log.Message($"Interval:{GainPerInterval}\nAmount:{amount}");
             if (CurrentCharge + GainPerInterval > Props.BaseEnergyMag)
             {
                 newSet = newSet + (Props.BaseEnergyMag- CurrentCharge - GainPerInterval);
@@ -227,28 +231,32 @@ namespace ActiveDefense
             }
             CurrentCharge = Math.Min(CurrentCharge + GainPerInterval, Props.BaseEnergyMag);
         }
-        public override void CompTickInterval(int delta)
+        public override void CompTick()
         {
-            base.CompTickInterval(delta);
-            if (CurrentCharge == Props.BaseEnergyMag)
-                return;
-            if (this.parent.ParentHolder is Pawn_EquipmentTracker tracker)
+            base.CompTick();
+            TicksCount++;
+            if (TicksCount % AmountOfTicksForRare == 0)
             {
-                Pawn owner = tracker.pawn;
-                var Source = NearestPoweredConduit(owner);
-                if (owner.Map != null && Source.Item1 != null)
+                if (CurrentCharge == Props.BaseEnergyMag)
+                    return;
+                if (this.parent.ParentHolder is Pawn_EquipmentTracker tracker)
                 {
-                    Recharge(Source.Item2, Source.Item1);
+                    Pawn owner = tracker.pawn;
+                    var Source = NearestPoweredConduit(owner);
+                    if (owner.Map != null && Source.Item1 != null)
+                    {
+                        EnsureWireMote(owner, Source.Item1);
+                        Recharge(Source.Item3, Source.Item2);
+                    }
+
                 }
             }
+            TicksCount = TicksCount == 60 ? 0 : TicksCount;
+            
         }
-        public override void CompTickRare()
+        private (Thing, CompPowerBattery, float) NearestPoweredConduit(Pawn pawn)
         {
-            CompTickInterval(AmountOfTicksForRare);
-        }
-        private (CompPowerBattery,float) NearestPoweredConduit(Pawn pawn)
-        {
-            var cells = GenRadial.RadialCellsAround(pawn.Position, 5f, true);
+            var cells = GenRadial.RadialCellsAround(pawn.Position, 6f, true);
             foreach (var cell in cells)
             {
                 if (!cell.InBounds(pawn.Map)) continue;
@@ -256,22 +264,58 @@ namespace ActiveDefense
                 var thingList = cell.GetThingList(pawn.Map);
                 foreach (var thing in thingList)
                 {
-                    if (thing is Building building && building.TryGetComp<CompPowerTrader>()?.PowerOn == true) {
-                        List<CompPowerBattery> bats = building.TryGetComp<CompPowerTrader>()?.PowerNet.batteryComps;
-                        foreach (var i in bats)
+                    if (thing is Building building)
+                    {
+                        var compBat = building.TryGetComp<CompPowerBattery>();
+                        var compTrans = building.TryGetComp<CompPowerTransmitter>();
+                        if (compTrans != null && compTrans.PowerNet != null)
                         {
-                            if (i.StoredEnergy >= i.PowerNet.CurrentEnergyGainRate()*AmountOfTicksForRare)
+                            List<CompPowerBattery> bats = compTrans.PowerNet.batteryComps;
+                            foreach (var i in bats)
                             {
-                                float Gain = i.PowerNet.CurrentEnergyGainRate();
-                                return (i, Gain);
+                                if (i.StoredEnergy >= i.PowerNet.CurrentEnergyGainRate() * AmountOfTicksForRare)
+                                {
+                                    float Gain = i.PowerNet.CurrentEnergyGainRate();
+                                    return (thing, i, Gain);
+                                }
                             }
                         }
-                            return (null,0); 
+                        if (compBat != null && compBat.PowerNet != null)
+                        {
+                            List<CompPowerBattery> bats = compBat.PowerNet.batteryComps;
+                            foreach (var i in bats)
+                            {
+                                if (i.StoredEnergy >= i.PowerNet.CurrentEnergyGainRate() * AmountOfTicksForRare)
+                                {
+                                    float Gain = i.PowerNet.CurrentEnergyGainRate();
+                                    return (thing, i, Gain);
+                                }
+                            }
+                        }
                     }
                 }
             }
+            return (null, null, 0);
+        }
+        private void EnsureWireMote(Pawn owner, Thing battery)
+        {
+            if (battery == null || !battery.Spawned)
+            {
+                if (TempestWireMote != null)
+                    TempestWireMote?.Destroy();
+                TempestWireMote = null;
+                return;
+            }
 
-            return (null,0);
+            if (TempestWireMote == null || TempestWireMote.Destroyed)
+            {
+                TempestWireMote = (MoteDualAttached)ThingMaker.MakeThing(ThingDef.Named("Mote_TempestWire"));
+                TempestWireMote.Attach(owner, battery);
+                GenSpawn.Spawn(TempestWireMote, owner.Position, owner.Map);
+
+            }
+            else TempestWireMote.UpdateTargets(owner, battery, Vector3.zero, Vector3.zero);
+            TempestWireMote.Maintain();
         }
         public override string CompInspectStringExtra()
         {
