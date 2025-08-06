@@ -58,7 +58,7 @@ namespace ActiveDefense
             Widgets.FillableBar(barRect, comp.CurrentCharge / comp.Props.BaseEnergyMag);
             Text.Font = GameFont.Small;
             Text.Anchor = TextAnchor.MiddleCenter;
-            Widgets.Label(barRect, comp.CurrentCharge + " / " + comp.Props.BaseEnergyMag);
+            Widgets.Label(barRect, String.Format("{0:0.00}",comp.CurrentCharge)  + " / " +String.Format("{0:0.00}",comp.Props.BaseEnergyMag));
             Text.Anchor = TextAnchor.UpperLeft;
             return new GizmoResult(GizmoState.Clear);
         }

@@ -184,10 +184,14 @@ namespace ActiveDefense
         public override IEnumerable<Gizmo> CompGetGizmosExtra()
         {
             // Mine
-            
-            var giz = new Gizmo_Tempest { comp = this };
-            giz.Order = -999f;
-            yield return giz;
+
+            if (Find.Selector.SingleSelectedThing is Pawn pawn &&
+        pawn.equipment?.Primary?.thingIDNumber == this.parent.thingIDNumber)
+            {
+                var giz = new Gizmo_Tempest { comp = this };
+                giz.Order = -999f;
+                yield return giz;
+            }
             //Based
             foreach (var gizmo in base.CompGetGizmosExtra())
                 yield return gizmo;
@@ -206,12 +210,21 @@ namespace ActiveDefense
 
         public void Recharge(float amount, CompPowerBattery Source)
         {
-            float GainPerInterval = amount * AmountOfTicksForRare / 60000;
+            float GainPerInterval = amount * AmountOfTicksForRare;
             float stEn = Source.StoredEnergy;
             float max = Source.Props.storedEnergyMax;
-            float newSet = Math.Min(0f, stEn - GainPerInterval);
-            Source.SetStoredEnergyPct(newSet / max);
 
+            float newSet = Math.Max(0f, stEn - GainPerInterval);
+            Log.Message($"Interval:{GainPerInterval}\nAmount:{amount}");
+            if (CurrentCharge + GainPerInterval > Props.BaseEnergyMag)
+            {
+                newSet = newSet + (Props.BaseEnergyMag- CurrentCharge - GainPerInterval);
+                Source.SetStoredEnergyPct(newSet / max);
+            }
+            else
+            {
+                Source.SetStoredEnergyPct(newSet / max);
+            }
             CurrentCharge = Math.Min(CurrentCharge + GainPerInterval, Props.BaseEnergyMag);
         }
         public override void CompTickInterval(int delta)
@@ -219,12 +232,9 @@ namespace ActiveDefense
             base.CompTickInterval(delta);
             if (CurrentCharge == Props.BaseEnergyMag)
                 return;
-            // Только если в руках у пешки
             if (this.parent.ParentHolder is Pawn_EquipmentTracker tracker)
             {
                 Pawn owner = tracker.pawn;
-
-                // И если он рядом с энергосетью
                 var Source = NearestPoweredConduit(owner);
                 if (owner.Map != null && Source.Item1 != null)
                 {
@@ -250,7 +260,7 @@ namespace ActiveDefense
                         List<CompPowerBattery> bats = building.TryGetComp<CompPowerTrader>()?.PowerNet.batteryComps;
                         foreach (var i in bats)
                         {
-                            if (i.StoredEnergy >= 5)
+                            if (i.StoredEnergy >= i.PowerNet.CurrentEnergyGainRate()*AmountOfTicksForRare)
                             {
                                 float Gain = i.PowerNet.CurrentEnergyGainRate();
                                 return (i, Gain);
