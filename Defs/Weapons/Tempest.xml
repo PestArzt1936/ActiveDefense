@@ -98,7 +98,6 @@
 					<extraMeleeDamages>
 						<li>
 							<def>EMP</def>
-							<!-- Используй готовый EMP -->
 							<amount>10</amount>
 						</li>
 					</extraMeleeDamages>
@@ -109,10 +108,12 @@
 			<li>SniperRifle</li>
 			<li>CE_AI_SR</li>
 		</weaponTags>
+		<tickerType>Rare</tickerType>
 		<comps>
 			<li Class="ActiveDefense.CompProperties_EnergyConsumption">
 				<BaseEnergyMag>100</BaseEnergyMag>
 				<BaseEnergyConsumptionPerShot>25</BaseEnergyConsumptionPerShot>
+				
 			</li>
 			<li Class="CombatExtended.CompProperties_FireModes">
 				<aiAimMode>AimedShot</aiAimMode>

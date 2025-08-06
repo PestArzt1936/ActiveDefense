@@ -18,11 +18,11 @@
 		<defName>EMP_SlowEffect</defName>
 		<label>EMP shock</label>
 		<labelNoun>an emp shockness</labelNoun>
-		<description>You have been attacked by Tempest while had EMP resist. No you are walking a bit slower.</description>
+		<description>You have been attacked by Tempest while had EMP resist. No you are walking signifiently slower.</description>
 		<isBad>true</isBad>
 		<comps>
 			<li Class="HediffCompProperties_Disappears">
-				<disappearsAfterTicks>30~240</disappearsAfterTicks>
+				<disappearsAfterTicks>90~240</disappearsAfterTicks>
 			</li>
 		</comps>
 		<stages>

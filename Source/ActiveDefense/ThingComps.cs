@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using CombatExtended;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -168,15 +169,29 @@ namespace ActiveDefense
             ResetSummaryEnergy(parent,selectedPct);
         }
     }
-    public class CompEnergyConsumption : ThingComp
+    public class CompEnergyConsumption : CompRangedGizmoGiver
     {
         public CompProperties_EnergyConsumption Props => (CompProperties_EnergyConsumption)this.props;
         public float CurrentCharge;
         public bool HasCharge => CurrentCharge >= Props.BaseEnergyConsumptionPerShot;
+        private int AmountOfTicksForRare = 30;
         public override void Initialize(CompProperties props)
         {
             base.Initialize(props);
+            
             CurrentCharge = Props.BaseEnergyMag;
+        }
+        public override IEnumerable<Gizmo> CompGetGizmosExtra()
+        {
+            // Mine
+            
+            var giz = new Gizmo_Tempest { comp = this };
+            giz.Order = -999f;
+            yield return giz;
+            //Based
+            foreach (var gizmo in base.CompGetGizmosExtra())
+                yield return gizmo;
+
         }
         public override void PostExposeData()
         {
@@ -191,32 +206,36 @@ namespace ActiveDefense
 
         public void Recharge(float amount, CompPowerBattery Source)
         {
+            float GainPerInterval = amount * AmountOfTicksForRare / 60000;
             float stEn = Source.StoredEnergy;
             float max = Source.Props.storedEnergyMax;
-            Source.SetStoredEnergyPct((stEn - amount) / max);
+            float newSet = Math.Min(0f, stEn - GainPerInterval);
+            Source.SetStoredEnergyPct(newSet / max);
 
-            CurrentCharge = Math.Min(CurrentCharge + amount, Props.BaseEnergyMag);
+            CurrentCharge = Math.Min(CurrentCharge + GainPerInterval, Props.BaseEnergyMag);
         }
-
-        public override void CompTickRare()
+        public override void CompTickInterval(int delta)
         {
-            base.CompTickRare();
-            Log.Message("Is tick rate working?");
+            base.CompTickInterval(delta);
+            if (CurrentCharge == Props.BaseEnergyMag)
+                return;
             // Только если в руках у пешки
             if (this.parent.ParentHolder is Pawn_EquipmentTracker tracker)
             {
-                Log.Message("You are holding weapon");
                 Pawn owner = tracker.pawn;
 
                 // И если он рядом с энергосетью
                 var Source = NearestPoweredConduit(owner);
-                if (owner.Map != null && Source.Item1!=null)
+                if (owner.Map != null && Source.Item1 != null)
                 {
-                    Recharge(Source.Item2,Source.Item1); // Зарядка с честным значением. Если идет разрядка, то неповезло иначе зарядка.
+                    Recharge(Source.Item2, Source.Item1);
                 }
             }
         }
-
+        public override void CompTickRare()
+        {
+            CompTickInterval(AmountOfTicksForRare);
+        }
         private (CompPowerBattery,float) NearestPoweredConduit(Pawn pawn)
         {
             var cells = GenRadial.RadialCellsAround(pawn.Position, 5f, true);
