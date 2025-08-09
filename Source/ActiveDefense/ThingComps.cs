@@ -215,7 +215,6 @@ namespace ActiveDefense
             float max = Source.Props.storedEnergyMax;
 
             float newSet = Math.Max(0f, stEn - GainPerInterval);
-            Log.Message($"Interval:{GainPerInterval}\nAmount:{amount}");
             if (CurrentCharge + GainPerInterval > Props.BaseEnergyMag)
             {
                 newSet = newSet + (Props.BaseEnergyMag- CurrentCharge - GainPerInterval);

@@ -25,8 +25,6 @@ namespace ActiveDefense
                 Pawn pawn = hitThing as Pawn;
                 if (pawn != null && !pawn.Destroyed && !pawn.Dead && !pawn.Downed)
                 {
-                    //var di = DamageInfo;
-                    //hitThing.TakeDamage(di);
                     if (pawn.stances?.stunner != null && !pawn.health.hediffSet.HasHediff(EMPStunResist))
                     {
                         pawn.stances.stunner.StunFor(Convert.ToInt32(180 * Rand.Range(0.5f, 1.5f)), launcher);
@@ -38,7 +36,7 @@ namespace ActiveDefense
                     }
                     if (Rand.Range(0, 100) < 30)
                     {
-                        this.TryAttachFire(0.2f, this.launcher);
+                        pawn.TryAttachFire(0.4f, this.launcher);
                     }
                     FleckMaker.ThrowLightningGlow(pawn.Position.ToVector3(), pawn.Map, 2.5f);
                     FleckMaker.ThrowMicroSparks(pawn.Position.ToVector3(), pawn.Map);
