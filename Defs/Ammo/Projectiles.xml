@@ -13,8 +13,8 @@
 			<damageDef>EMP</damageDef>
 			<damageAmountBase>30</damageAmountBase>
 			<armorPenetrationBase>999</armorPenetrationBase>
-			<speed>250</speed>
-			<stoppingPower>0.1</stoppingPower>
+			<speed>180</speed>
+			<stoppingPower>0.6</stoppingPower>
 			<flyOverhead>false</flyOverhead>
 		</projectile>
 	</ThingDef>

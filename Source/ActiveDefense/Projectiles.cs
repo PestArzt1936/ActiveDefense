@@ -7,45 +7,46 @@ using System.Threading.Tasks;
 using Verse;
 using CombatExtended;
 using UnityEngine.PlayerLoop;
+using Verse.Noise;
 
 namespace ActiveDefense
 {
-    public class Projectile_TempestArc : ProjectileCE
+    public class Projectile_TempestArc : BulletCE
     {
         private static readonly HediffDef EMPStunResist = HediffDef.Named("EMP_StunResistance");
         private static readonly HediffDef EMPSlow = HediffDef.Named("EMP_SlowEffect");
         
         public override void Impact(Thing hitThing)
         {
-            base.Impact(hitThing);
+
             if (hitThing != null)
             {
+                base.Impact(hitThing);
                 Pawn pawn = hitThing as Pawn;
                 if (pawn != null && !pawn.Destroyed && !pawn.Dead && !pawn.Downed)
                 {
                     if (pawn.stances?.stunner != null && !pawn.health.hediffSet.HasHediff(EMPStunResist))
                     {
-                        Log.Message("Накладываю стан");
-                        pawn.stances.stunner.StunFor(60, launcher);
+                        pawn.stances.stunner.StunFor(Convert.ToInt32(180 * Rand.Range(0.5f, 1.5f)), launcher);
                         pawn.health.AddHediff(EMPStunResist);
                     }
                     else
                     {
-                        Log.Message("Накладываю замедление");
                         pawn.health.AddHediff(EMPSlow);
                     }
-                    if (Rand.Chance(0.3f))
+                    if (Rand.Range(0, 100) < 30)
                     {
-                        FireUtility.TryStartFireIn(pawn.Position, pawn.Map, 0.1f, this.launcher);
+                        pawn.TryAttachFire(0.4f, this.launcher);
                     }
-                    Log.Message("Конец проверки на живую пешку");
                     FleckMaker.ThrowLightningGlow(pawn.Position.ToVector3(), pawn.Map, 2.5f);
                     FleckMaker.ThrowMicroSparks(pawn.Position.ToVector3(), pawn.Map);
                 }
-                Log.Message("Соси хуй, ты не прошел проверку на живую пешку");
             }
-            Log.Message("Соси хуй, ты не попал?");
+            else
+                base.Impact(null);
+            
         }
+        
     }
     public class Verb_TempestShootCE : CombatExtended.Verb_ShootCE
     {
