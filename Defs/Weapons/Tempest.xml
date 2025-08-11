@@ -89,7 +89,7 @@
 				<capacities>
 					<li>Poke</li>
 				</capacities>
-				<power>15</power>
+				<power>8</power>
 				<chanceFactor>3</chanceFactor>
 				<cooldownTime>2.05</cooldownTime>
 				<armorPenetrationBlunt>12.755</armorPenetrationBlunt>
@@ -98,7 +98,7 @@
 					<extraMeleeDamages>
 						<li>
 							<def>EMP</def>
-							<amount>10</amount>
+							<amount>20</amount>
 						</li>
 					</extraMeleeDamages>
 				</surpriseAttack>
@@ -108,7 +108,7 @@
 			<li>SniperRifle</li>
 			<li>CE_AI_SR</li>
 		</weaponTags>
-		<tickerType>Rare</tickerType>
+		<tickerType>Normal</tickerType>
 		<comps>
 			<li Class="ActiveDefense.CompProperties_EnergyConsumption">
 				<BaseEnergyMag>100</BaseEnergyMag>

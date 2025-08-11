@@ -18,4 +18,17 @@
 			<flyOverhead>false</flyOverhead>
 		</projectile>
 	</ThingDef>
+	<ThingDef>
+		<defName>TempLightningBolt</defName>
+		<label>Custom lightning bolt</label>
+		<thingClass>ActiveDefense.Thing_LightningBoltTemp</thingClass>
+		<drawerType>None</drawerType>
+		<category>Mote</category>
+		<altitudeLayer>Weather</altitudeLayer>
+		<tickerType>Normal</tickerType>
+		<drawOffscreen>true</drawOffscreen>
+		<neverMultiSelect>true</neverMultiSelect>
+		<useHitPoints>false</useHitPoints>
+		<selectable>false</selectable>
+	</ThingDef>
 </Defs>
