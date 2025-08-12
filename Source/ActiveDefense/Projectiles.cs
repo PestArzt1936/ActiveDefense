@@ -1,13 +1,15 @@
-﻿using RimWorld;
+﻿using CombatExtended;
+using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Verse;
-using CombatExtended;
+using UnityEngine;
 using UnityEngine.PlayerLoop;
+using Verse;
 using Verse.Noise;
+using Verse.Sound;
 
 namespace ActiveDefense
 {
@@ -15,13 +17,23 @@ namespace ActiveDefense
     {
         private static readonly HediffDef EMPStunResist = HediffDef.Named("EMP_StunResistance");
         private static readonly HediffDef EMPSlow = HediffDef.Named("EMP_SlowEffect");
-        
+
         public override void Impact(Thing hitThing)
         {
 
             if (hitThing != null)
             {
+                
+                Thing_LightningBoltTemp bolt = (Thing_LightningBoltTemp)ThingMaker.MakeThing(ThingDef.Named("TempLightningBolt"));
+                if(bolt==null)
+                    Log.Message("Lightning bolt is null");
+                bolt.Setup(launcher.Position.ToVector3Shifted(), hitThing.Position.ToVector3Shifted());
+                GenSpawn.Spawn(bolt, hitThing.Position,hitThing.Map);
+                SoundDef.Named("TempestBolt_Tail").PlayOneShot(bolt);
                 base.Impact(hitThing);
+                FleckMaker.ThrowLightningGlow(hitThing.Position.ToVector3(), hitThing.Map, 2.5f);
+                FleckMaker.ThrowMicroSparks(hitThing.Position.ToVector3(), hitThing.Map);
+
                 Pawn pawn = hitThing as Pawn;
                 if (pawn != null && !pawn.Destroyed && !pawn.Dead && !pawn.Downed)
                 {
@@ -36,15 +48,12 @@ namespace ActiveDefense
                     }
                     if (Rand.Range(0, 100) < 30)
                     {
-                        pawn.TryAttachFire(0.4f, this.launcher);
+                        pawn.TryAttachFire(Rand.Range(0.1f,0.5f), this.launcher);
                     }
-                    FleckMaker.ThrowLightningGlow(pawn.Position.ToVector3(), pawn.Map, 2.5f);
-                    FleckMaker.ThrowMicroSparks(pawn.Position.ToVector3(), pawn.Map);
                 }
             }
             else
                 base.Impact(null);
-            
         }
         
     }

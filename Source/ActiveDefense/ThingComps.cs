@@ -175,6 +175,9 @@ namespace ActiveDefense
         public float CurrentCharge;
         public bool HasCharge => CurrentCharge >= Props.BaseEnergyConsumptionPerShot;
         private int AmountOfTicksForRare = 30;
+        private int TicksCount = 0;
+
+        private Mote TempestWireMote;
         public override void Initialize(CompProperties props)
         {
             base.Initialize(props);
@@ -226,28 +229,32 @@ namespace ActiveDefense
             }
             CurrentCharge = Math.Min(CurrentCharge + GainPerInterval, Props.BaseEnergyMag);
         }
-        public override void CompTickInterval(int delta)
+        public override void CompTick()
         {
-            base.CompTickInterval(delta);
-            if (CurrentCharge == Props.BaseEnergyMag)
-                return;
-            if (this.parent.ParentHolder is Pawn_EquipmentTracker tracker)
+            base.CompTick();
+            TicksCount++;
+            if (TicksCount % AmountOfTicksForRare == 0)
             {
-                Pawn owner = tracker.pawn;
-                var Source = NearestPoweredConduit(owner);
-                if (owner.Map != null && Source.Item1 != null)
+                if (CurrentCharge == Props.BaseEnergyMag)
+                    return;
+                if (this.parent.ParentHolder is Pawn_EquipmentTracker tracker)
                 {
-                    Recharge(Source.Item2, Source.Item1);
+                    Pawn owner = tracker.pawn;
+                    var Source = NearestPoweredConduit(owner);
+                    if (owner.Map != null && Source.Item1 != null)
+                    {
+                        EnsureWireMote(owner, Source.Item1);
+                        Recharge(Source.Item3, Source.Item2);
+                    }
+
                 }
             }
+            TicksCount = TicksCount == 60 ? 0 : TicksCount;
+            
         }
-        public override void CompTickRare()
+        private (Thing, CompPowerBattery, float) NearestPoweredConduit(Pawn pawn)
         {
-            CompTickInterval(AmountOfTicksForRare);
-        }
-        private (CompPowerBattery,float) NearestPoweredConduit(Pawn pawn)
-        {
-            var cells = GenRadial.RadialCellsAround(pawn.Position, 5f, true);
+            var cells = GenRadial.RadialCellsAround(pawn.Position, 6f, true);
             foreach (var cell in cells)
             {
                 if (!cell.InBounds(pawn.Map)) continue;
@@ -255,22 +262,46 @@ namespace ActiveDefense
                 var thingList = cell.GetThingList(pawn.Map);
                 foreach (var thing in thingList)
                 {
-                    if (thing is Building building && building.TryGetComp<CompPowerTrader>()?.PowerOn == true) {
-                        List<CompPowerBattery> bats = building.TryGetComp<CompPowerTrader>()?.PowerNet.batteryComps;
+                    if (thing is Building building && building.TransmitsPowerNow)
+                    {
+                        var compBat = building.TryGetComp<CompPowerBattery>();
+                        if (compBat == null || compBat.transNet == null) continue;
+
+                        List<CompPowerBattery> bats = compBat.transNet.batteryComps;
                         foreach (var i in bats)
                         {
-                            if (i.StoredEnergy >= i.PowerNet.CurrentEnergyGainRate()*AmountOfTicksForRare)
+                            if (i.StoredEnergy >= i.PowerNet.CurrentEnergyGainRate() * AmountOfTicksForRare)
                             {
                                 float Gain = i.PowerNet.CurrentEnergyGainRate();
-                                return (i, Gain);
+                                return (thing, i, Gain);
                             }
                         }
-                            return (null,0); 
                     }
                 }
             }
+            return (null, null, 0);
+        }
+        private void EnsureWireMote(Pawn owner, Thing battery)
+        {
+            if (battery == null || !battery.Spawned)
+            {
+                if (TempestWireMote != null) TempestWireMote.Destroy();
+                TempestWireMote = null;
+                return;
+            }
 
-            return (null,0);
+            if (TempestWireMote == null)
+            {
+                TempestWireMote = (Mote)ThingMaker.MakeThing(ThingDef.Named("Mote_TempestWire"));
+                GenSpawn.Spawn(TempestWireMote, owner.Position, owner.Map);
+            }
+
+            Vector3 from = owner.DrawPos;
+            Vector3 to = battery.DrawPos;
+            TempestWireMote.exactPosition = (from + to) / 2f;
+            TempestWireMote.exactRotation = (to - from).AngleFlat();
+            float lengthCells = (to - from).magnitude / 1.0f;
+            TempestWireMote.Scale = Mathf.Max(0.2f, lengthCells);
         }
         public override string CompInspectStringExtra()
         {

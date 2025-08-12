@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+    <ThingDef ParentName="MoteBase">
+  <defName>Mote_TempestWire</defName>
+  <label>tempest wire</label>
+  <graphicData>
+    <texPath>Things/Special/Wire</texPath>
+    <graphicClass>Graphic_Single</graphicClass>
+    <shaderType>Transparent</shaderType>
+  </graphicData>
+  <altitudeLayer>MoteOverhead</altitudeLayer>
+  <mote>
+    <fadeInTime>0.02</fadeInTime>
+      <solidTime>0.2</solidTime>
+      <fadeOutTime>0.02</fadeOutTime>
+  </mote>
+</ThingDef>
+</Defs>

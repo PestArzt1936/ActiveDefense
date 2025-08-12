@@ -69,6 +69,7 @@
   <ItemGroup>
     <Compile Include="Building_EMPEmitter.cs" />
     <Compile Include="CompProperties.cs" />
+    <Compile Include="CustomLightning.cs" />
     <Compile Include="Projectiles.cs" />
     <Compile Include="ThingComps.cs" />
     <Compile Include="Gizmos.cs" />
