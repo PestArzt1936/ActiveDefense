@@ -14,90 +14,118 @@ namespace ActiveDefense
     {
         private static List<Vector2> verts2D;
         private static Vector2 lightningStart;
+        private static Vector2 lightningEnd;
+        private static Vector2 lightningPerpendicular;
 
         private const float VertexInterval = 0.25f;
         private const float MeshWidth = 2f;
         private const float UVIntervalY = 0.04f;
-        private const float PerturbAmp = 12f;
+        private const float PerturbAmp = 3f;
         private const float PerturbFreq = 0.007f;
 
+        private static void CountPerpendicular()
+        {
+            Vector2 vec = lightningEnd - lightningStart;
+            lightningPerpendicular = new Vector2(-vec.y,vec.x);
+        }
         public static Mesh NewBoltMesh(Vector3 start, Vector3 end)
         {
-            lightningStart = new Vector2(start.x,start.y);
-            // 1. Вектор и сегменты
-            Vector3 dir = end - start;
-            float length = dir.magnitude;
-            dir.Normalize();
-
-            int segments = (int)Math.Ceiling(length / VertexInterval);
-            Vector3 step = dir * VertexInterval;
-
-            // 2. Базовые точки
-            List<Vector3> vertsBase = new List<Vector3>();
-            Vector3 current = start;
-            for (int i = 0; i <= segments; i++)
+            lightningStart = new Vector2(start.x,start.z);
+            lightningEnd = new Vector2(end.x,end.z);
+            CountPerpendicular();
+            MakeVerticesBase();
+            PeturbVerticesRandomly();
+            DoubleVertices();
+            return MeshFromVerts();
+        }
+        private static void MakeVerticesBase()
+        {
+            float magn = (lightningEnd - lightningStart).magnitude;
+            int num = (int)Math.Ceiling(magn / VertexInterval);
+            Vector2 vector = (lightningEnd - lightningStart) / num;
+            verts2D = new List<Vector2>();
+            Vector2 zero = Vector2.zero;
+            for (int i = 0; i < num; i++)
             {
-                vertsBase.Add(current);
-                current += step;
+                verts2D.Add(zero);
+                zero += vector;
             }
-
-            // 3. Пертурбация
+        }
+        private static void PeturbVerticesRandomly()
+        {
             Perlin perlin = new Perlin(PerturbFreq, 2.0, 0.5, 6, Rand.Range(0, int.MaxValue), QualityMode.High);
-
-            List<Vector3> vertsPerturbed = new List<Vector3>();
-            // Вычисляем перпендикуляр (направление колебаний)
-            Vector3 perp = Vector3.Cross(dir, Vector3.up).normalized;
-
-            for (int i = 0; i < vertsBase.Count; i++)
+            List<Vector2> list = verts2D.ListFullCopy();
+            // Xa*Xb+Ya*Yb=0
+            
+            verts2D.Clear();
+            for (int i = 0; i < list.Count; i++)
             {
-                float offset = PerturbAmp * (float)perlin.GetValue(i, 0.0, 0.0);
-                vertsPerturbed.Add(vertsBase[i] + perp * offset);
+                if (i == 0 || i == list.Count - 1)
+                {
+                    verts2D.Add(list[i]);
+                }
+                else
+                {
+                    //Grade of lightning bolt. Stable "start" and "end" and unstable beautiful middle of bolt
+                    float t = (float)i / (list.Count - 1);
+                    float localAmp = PerturbAmp * Mathf.Sin(t * Mathf.PI);
+                    float num = localAmp * (float)perlin.GetValue(i, 0.0, 0.0);
+                    Vector2 item = list[i] + num * lightningPerpendicular.normalized;
+                    verts2D.Add(item);
+                }
             }
-
-            // 4. Двойные вершины для ширины
-            List<Vector3> finalVerts = new List<Vector3>();
-            for (int i = 0; i < vertsPerturbed.Count; i++)
+        }
+        private static void DoubleVertices()
+        {
+            List<Vector2> list = verts2D.ListFullCopy();
+            Vector2 perp = lightningPerpendicular.normalized * (MeshWidth / 2f);
+            verts2D.Clear();
+            for (int i = 0; i < list.Count; i++)
             {
-                Vector3 sideDir = Vector3.Cross(Vector3.up, dir).normalized; // поперечник для толщины
-                Vector3 v1 = vertsPerturbed[i] - sideDir * (MeshWidth / 2f);
-                Vector3 v2 = vertsPerturbed[i] + sideDir * (MeshWidth / 2f);
-                finalVerts.Add(v1);
-                finalVerts.Add(v2);
+                Vector2 left = list[i] - perp;
+                Vector2 right = list[i] + perp;
+                verts2D.Add(left);
+                verts2D.Add(right);
             }
-
-            // 5. UV
-            Vector2[] uvs = new Vector2[finalVerts.Count];
-            float uvY = 0f;
-            for (int i = 0; i < finalVerts.Count; i += 2)
+        }
+        private static Mesh MeshFromVerts()
+        {
+            Vector3[] array = new Vector3[verts2D.Count];
+            for (int i = 0; i < array.Length; i++)
             {
-                uvs[i] = new Vector2(0f, uvY);
-                uvs[i + 1] = new Vector2(1f, uvY);
-                uvY += UVIntervalY;
+                array[i] = new Vector3(verts2D[i].x, 0f, verts2D[i].y);
             }
-
-            // 6. Треугольники
-            int[] tris = new int[(finalVerts.Count - 2) * 3];
-            for (int i = 0; i < finalVerts.Count - 2; i += 2)
+            float num = 0f;
+            Vector2[] array2 = new Vector2[verts2D.Count];
+            for (int j = 0; j < verts2D.Count; j += 2)
             {
-                int triIndex = i * 3;
-                tris[triIndex] = i;
-                tris[triIndex + 1] = i + 1;
-                tris[triIndex + 2] = i + 2;
-
-                tris[triIndex + 3] = i + 2;
-                tris[triIndex + 4] = i + 1;
-                tris[triIndex + 5] = i + 3;
+                array2[j] = new Vector2(0f, num);
+                array2[j + 1] = new Vector2(1f, num);
+                if (j < 10)
+                    num += UVIntervalY;
+                else
+                    num -= UVIntervalY;
             }
-
-            // 7. Mesh
-            Mesh mesh = new Mesh
+            int quadCount = (verts2D.Count / 2) - 1;
+            int[] tris = new int[quadCount * 6];
+            for (int i = 0; i < quadCount; i++)
             {
-                vertices = finalVerts.ToArray(),
-                uv = uvs,
+                int vi = i * 2;
+                int ti = i * 6;
+                tris[ti] = vi;
+                tris[ti + 1] = vi + 1;
+                tris[ti + 2] = vi + 2;
+                tris[ti + 3] = vi + 2;
+                tris[ti + 4] = vi + 1;
+                tris[ti + 5] = vi + 3;
+            }
+            return new Mesh
+            {
+                vertices = array,
+                uv = array2,
                 triangles = tris,
-                name = "CustomLightning"
+                name = "MeshFromVerts()"
             };
-            return mesh;
         }
     }
     public class Thing_LightningBoltTemp : Thing
@@ -113,25 +141,35 @@ namespace ActiveDefense
             start = startPos;
             end = endPos;
             ticksLeft = 20;
-            Log.Message("Ending setup lightning bolt");
         }
         
         protected override void Tick()
         {
             base.Tick();
             float fade = 1 - (1 / TicksBase * (TicksBase - ticksLeft));
-            Graphics.DrawMesh(CustomLightningBoltMeshPool.GetRandomBoltMesh(start,end), Vector3.zero, Quaternion.identity, FadedMaterialPool.FadedVersionOf(LightningMat, fade), 0);
-            Log.Message("Drawed lightning bolt");
+            
+            //Angle of lightning bolt-_- (Tired of that shit)
+            Vector3 dir = end - start;
+            dir.y = 0f;
+            float angle = Mathf.Atan2(dir.x, dir.z);
+            Quaternion rotation = Quaternion.AngleAxis(angle,Vector3.up);
+
+
+            Graphics.DrawMesh(CustomLightningBoltMeshPool.GetRandomBoltMesh(start,end), start, rotation, FadedMaterialPool.FadedVersionOf(LightningMat, fade), 0);
+
             ticksLeft--;
             if (ticksLeft <= 0)
+            {
                 Destroy(DestroyMode.Vanish);
+                CustomLightningBoltMeshPool.RefreshList();
+            }
         }
     }
     public static class CustomLightningBoltMeshPool
     {
         private static List<Mesh> boltMeshes = new List<Mesh>();
 
-        private const int NumBoltMeshesMax = 20;
+        private const int NumBoltMeshesMax = 10;
 
         public static Mesh GetRandomBoltMesh(Vector3 Start,Vector3 End)
         {
@@ -141,7 +179,14 @@ namespace ActiveDefense
                     boltMeshes.Add(mesh);
                     return mesh;
                 }
-                return boltMeshes.RandomElement();
+            return boltMeshes.RandomElement();
+        }
+        public static void RefreshList()
+        {
+            if (boltMeshes.Count == NumBoltMeshesMax)
+            {
+                boltMeshes.Clear();
+            }
         }
     }
 }

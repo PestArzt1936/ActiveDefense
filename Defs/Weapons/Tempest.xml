@@ -59,7 +59,7 @@
 				<warmupTime>3</warmupTime>
 				<minRange>2</minRange>
 				<range>30</range>
-				<soundCast>Electric_Spark_Large</soundCast>
+				<soundCast>TempestBolt_Cast</soundCast>
 			</li>
 		</verbs>
 		<tools>

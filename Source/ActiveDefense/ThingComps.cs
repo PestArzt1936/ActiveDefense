@@ -252,7 +252,7 @@ namespace ActiveDefense
             TicksCount = TicksCount == 60 ? 0 : TicksCount;
             
         }
-        private (Thing,CompPowerBattery,float) NearestPoweredConduit(Pawn pawn)
+        private (Thing, CompPowerBattery, float) NearestPoweredConduit(Pawn pawn)
         {
             var cells = GenRadial.RadialCellsAround(pawn.Position, 6f, true);
             foreach (var cell in cells)
@@ -262,26 +262,28 @@ namespace ActiveDefense
                 var thingList = cell.GetThingList(pawn.Map);
                 foreach (var thing in thingList)
                 {
-                    if (thing is Building building && building.TransmitsPowerNow) {
-                        List<CompPowerBattery> bats = building.TryGetComp<CompPowerBattery>().transNet.batteryComps;
+                    if (thing is Building building && building.TransmitsPowerNow)
+                    {
+                        var compBat = building.TryGetComp<CompPowerBattery>();
+                        if (compBat == null || compBat.transNet == null) continue;
+
+                        List<CompPowerBattery> bats = compBat.transNet.batteryComps;
                         foreach (var i in bats)
                         {
-                            if (i.StoredEnergy >= i.PowerNet.CurrentEnergyGainRate()*AmountOfTicksForRare)
+                            if (i.StoredEnergy >= i.PowerNet.CurrentEnergyGainRate() * AmountOfTicksForRare)
                             {
                                 float Gain = i.PowerNet.CurrentEnergyGainRate();
-                                //Log.Message($"Thing:{thing.def}; Battery:{i.Props.storedEnergyMax}");
-                                return (thing,i, Gain);
+                                return (thing, i, Gain);
                             }
                         }
-                            
                     }
                 }
             }
-            return (null,null,0);
+            return (null, null, 0);
         }
         private void EnsureWireMote(Pawn owner, Thing battery)
         {
-            if (battery == null)
+            if (battery == null || !battery.Spawned)
             {
                 if (TempestWireMote != null) TempestWireMote.Destroy();
                 TempestWireMote = null;
@@ -291,10 +293,9 @@ namespace ActiveDefense
             if (TempestWireMote == null)
             {
                 TempestWireMote = (Mote)ThingMaker.MakeThing(ThingDef.Named("Mote_TempestWire"));
-                // прикрепляем к карте
                 GenSpawn.Spawn(TempestWireMote, owner.Position, owner.Map);
             }
-            // устанавливаем позицию, угол и масштаб для линии
+
             Vector3 from = owner.DrawPos;
             Vector3 to = battery.DrawPos;
             TempestWireMote.exactPosition = (from + to) / 2f;
