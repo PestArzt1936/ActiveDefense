@@ -97,7 +97,6 @@
 				<surpriseAttack>
 					<extraMeleeDamages>
 						<li>
-							<def>EMP</def>
 							<amount>20</amount>
 						</li>
 					</extraMeleeDamages>
@@ -108,12 +107,10 @@
 			<li>SniperRifle</li>
 			<li>CE_AI_SR</li>
 		</weaponTags>
-		<tickerType>Normal</tickerType>
 		<comps>
 			<li Class="ActiveDefense.CompProperties_EnergyConsumption">
 				<BaseEnergyMag>100</BaseEnergyMag>
 				<BaseEnergyConsumptionPerShot>25</BaseEnergyConsumptionPerShot>
-				
 			</li>
 			<li Class="CombatExtended.CompProperties_FireModes">
 				<aiAimMode>AimedShot</aiAimMode>

@@ -51,7 +51,6 @@ namespace ActiveDefense
                         pawn.TryAttachFire(Rand.Range(0.1f,0.5f), this.launcher);
                     }
                 }
-                
             }
             else
                 base.Impact(null);
