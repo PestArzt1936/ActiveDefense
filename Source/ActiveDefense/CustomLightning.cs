@@ -134,10 +134,12 @@ namespace ActiveDefense
         private Vector3 end;
         private int TicksBase = 20;
         private int ticksLeft = 20;
+        CustomLightningBoltMeshPool pool;
         private static readonly Material LightningMat = MatLoader.LoadMat("Weather/LightningBolt");
 
         public void Setup(Vector3 startPos, Vector3 endPos)
         {
+            pool = new CustomLightningBoltMeshPool();
             start = startPos;
             end = endPos;
             ticksLeft = 20;
@@ -145,6 +147,8 @@ namespace ActiveDefense
         
         protected override void Tick()
         {
+            if (ticksLeft != 0)
+            {
             base.Tick();
             float fade = 1 - (1 / TicksBase * (TicksBase - ticksLeft));
             
@@ -152,26 +156,28 @@ namespace ActiveDefense
             Vector3 dir = end - start;
             dir.y = 0f;
             float angle = Mathf.Atan2(dir.x, dir.z);
-            Quaternion rotation = Quaternion.AngleAxis(angle,Vector3.up);
+                Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.up);
 
 
-            Graphics.DrawMesh(CustomLightningBoltMeshPool.GetRandomBoltMesh(start,end), start, rotation, FadedMaterialPool.FadedVersionOf(LightningMat, fade), 0);
+                Graphics.DrawMesh(pool.GetRandomBoltMesh(start, end), start, rotation, FadedMaterialPool.FadedVersionOf(LightningMat, fade), 0);
+
 
             ticksLeft--;
+            }
             if (ticksLeft <= 0)
             {
-                Destroy(DestroyMode.Vanish);
-                CustomLightningBoltMeshPool.RefreshList();
+                pool.RefreshList();
+                //Destroy(DestroyMode.Vanish);
             }
         }
     }
-    public static class CustomLightningBoltMeshPool
+    public class CustomLightningBoltMeshPool
     {
-        private static List<Mesh> boltMeshes = new List<Mesh>();
+        private List<Mesh> boltMeshes = new List<Mesh>();
 
-        private const int NumBoltMeshesMax = 10;
+        private const int NumBoltMeshesMax = 1;
 
-        public static Mesh GetRandomBoltMesh(Vector3 Start,Vector3 End)
+        public Mesh GetRandomBoltMesh(Vector3 Start,Vector3 End)
         {
                 if (boltMeshes.Count < NumBoltMeshesMax)
                 {
@@ -181,7 +187,7 @@ namespace ActiveDefense
                 }
             return boltMeshes.RandomElement();
         }
-        public static void RefreshList()
+        public void RefreshList()
         {
             if (boltMeshes.Count == NumBoltMeshesMax)
             {

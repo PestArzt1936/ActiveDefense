@@ -176,13 +176,15 @@ namespace ActiveDefense
         public bool HasCharge => CurrentCharge >= Props.BaseEnergyConsumptionPerShot;
         private int AmountOfTicksForRare = 30;
         private int TicksCount = 0;
-
-        private Mote TempestWireMote;
+        private MoteDualAttached TempestWireMote;
         public override void Initialize(CompProperties props)
         {
             base.Initialize(props);
-            
             CurrentCharge = Props.BaseEnergyMag;
+        }
+        public override void PostSpawnSetup(bool respawningAfterLoad)
+        {
+            base.PostSpawnSetup(respawningAfterLoad);
         }
         public override IEnumerable<Gizmo> CompGetGizmosExtra()
         {
@@ -262,18 +264,32 @@ namespace ActiveDefense
                 var thingList = cell.GetThingList(pawn.Map);
                 foreach (var thing in thingList)
                 {
-                    if (thing is Building building && building.TransmitsPowerNow)
+                    if (thing is Building building)
                     {
                         var compBat = building.TryGetComp<CompPowerBattery>();
-                        if (compBat == null || compBat.transNet == null) continue;
-
-                        List<CompPowerBattery> bats = compBat.transNet.batteryComps;
-                        foreach (var i in bats)
+                        var compTrans = building.TryGetComp<CompPowerTransmitter>();
+                        if (compTrans != null && compTrans.PowerNet != null)
                         {
-                            if (i.StoredEnergy >= i.PowerNet.CurrentEnergyGainRate() * AmountOfTicksForRare)
+                            List<CompPowerBattery> bats = compTrans.PowerNet.batteryComps;
+                            foreach (var i in bats)
                             {
-                                float Gain = i.PowerNet.CurrentEnergyGainRate();
-                                return (thing, i, Gain);
+                                if (i.StoredEnergy >= i.PowerNet.CurrentEnergyGainRate() * AmountOfTicksForRare)
+                                {
+                                    float Gain = i.PowerNet.CurrentEnergyGainRate();
+                                    return (thing, i, Gain);
+                                }
+                            }
+                        }
+                        if (compBat != null && compBat.PowerNet != null)
+                        {
+                            List<CompPowerBattery> bats = compBat.PowerNet.batteryComps;
+                            foreach (var i in bats)
+                            {
+                                if (i.StoredEnergy >= i.PowerNet.CurrentEnergyGainRate() * AmountOfTicksForRare)
+                                {
+                                    float Gain = i.PowerNet.CurrentEnergyGainRate();
+                                    return (thing, i, Gain);
+                                }
                             }
                         }
                     }
@@ -285,23 +301,21 @@ namespace ActiveDefense
         {
             if (battery == null || !battery.Spawned)
             {
-                if (TempestWireMote != null) TempestWireMote.Destroy();
+                if (TempestWireMote != null)
+                    TempestWireMote?.Destroy();
                 TempestWireMote = null;
                 return;
             }
 
-            if (TempestWireMote == null)
+            if (TempestWireMote == null || TempestWireMote.Destroyed)
             {
-                TempestWireMote = (Mote)ThingMaker.MakeThing(ThingDef.Named("Mote_TempestWire"));
+                TempestWireMote = (MoteDualAttached)ThingMaker.MakeThing(ThingDef.Named("Mote_TempestWire"));
+                TempestWireMote.Attach(owner, battery);
                 GenSpawn.Spawn(TempestWireMote, owner.Position, owner.Map);
-            }
 
-            Vector3 from = owner.DrawPos;
-            Vector3 to = battery.DrawPos;
-            TempestWireMote.exactPosition = (from + to) / 2f;
-            TempestWireMote.exactRotation = (to - from).AngleFlat();
-            float lengthCells = (to - from).magnitude / 1.0f;
-            TempestWireMote.Scale = Mathf.Max(0.2f, lengthCells);
+            }
+            else TempestWireMote.UpdateTargets(owner, battery, Vector3.zero, Vector3.zero);
+            TempestWireMote.Maintain();
         }
         public override string CompInspectStringExtra()
         {
