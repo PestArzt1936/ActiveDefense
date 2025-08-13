@@ -3,16 +3,20 @@
     <ThingDef ParentName="MoteBase">
   <defName>Mote_TempestWire</defName>
   <label>tempest wire</label>
+  <thingClass>Verse.MoteDualAttached</thingClass>
   <graphicData>
-    <texPath>Things/Special/Wire</texPath>
+    <texPath>Special/Wire</texPath>
     <graphicClass>Graphic_Single</graphicClass>
-    <shaderType>Transparent</shaderType>
+    <drawSize>(1.0, 0.20)</drawSize>
+    <shaderType>Mote</shaderType>
   </graphicData>
   <altitudeLayer>MoteOverhead</altitudeLayer>
   <mote>
-    <fadeInTime>0.02</fadeInTime>
-      <solidTime>0.2</solidTime>
-      <fadeOutTime>0.02</fadeOutTime>
+    <rotateTowardsTarget>true</rotateTowardsTarget>
+    <scaleToConnectTargets>true</scaleToConnectTargets>
+    <fadeInTime>0</fadeInTime>
+    <solidTime>999999</solidTime>
+    <fadeOutTime>0</fadeOutTime>
   </mote>
 </ThingDef>
 </Defs>

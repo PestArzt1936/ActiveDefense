@@ -107,6 +107,7 @@
 			<li>SniperRifle</li>
 			<li>CE_AI_SR</li>
 		</weaponTags>
+		<tickerType>Normal</tickerType>
 		<comps>
 			<li Class="ActiveDefense.CompProperties_EnergyConsumption">
 				<BaseEnergyMag>100</BaseEnergyMag>
