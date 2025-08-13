@@ -5,7 +5,7 @@
   <label>tempest wire</label>
   <thingClass>Verse.MoteDualAttached</thingClass>
   <graphicData>
-    <texPath>Special/Wire</texPath>
+    <texPath>Things/Special/Wire</texPath>
     <graphicClass>Graphic_Single</graphicClass>
     <drawSize>(1.0, 0.20)</drawSize>
     <shaderType>Mote</shaderType>

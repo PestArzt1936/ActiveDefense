@@ -149,20 +149,20 @@ namespace ActiveDefense
         {
             if (ticksLeft != 0)
             {
-                base.Tick();
-                float fade = 1 - (1 / TicksBase * (TicksBase - ticksLeft));
-
-                //Angle of lightning bolt-_- (Tired of that shit)
-                Vector3 dir = end - start;
-                dir.y = 0f;
-                float angle = Mathf.Atan2(dir.x, dir.z);
+            base.Tick();
+            float fade = 1 - (1 / TicksBase * (TicksBase - ticksLeft));
+            
+            //Angle of lightning bolt-_- (Tired of that shit)
+            Vector3 dir = end - start;
+            dir.y = 0f;
+            float angle = Mathf.Atan2(dir.x, dir.z);
                 Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.up);
 
 
                 Graphics.DrawMesh(pool.GetRandomBoltMesh(start, end), start, rotation, FadedMaterialPool.FadedVersionOf(LightningMat, fade), 0);
 
 
-                ticksLeft--;
+            ticksLeft--;
             }
             if (ticksLeft <= 0)
             {
